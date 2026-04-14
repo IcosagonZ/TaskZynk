@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 // Pages
 import 'pages/home.dart';
-import 'pages/task.dart';
 
 void main()
 {
@@ -20,7 +19,7 @@ class TaskZynkApp extends StatelessWidget
     (
       title: 'TaskZynk',
       theme: ThemeData.dark(),
-      home: const TaskPage(),
+      home: const HomePage(),
       debugShowCheckedModeBanner: false,
     );
   }
