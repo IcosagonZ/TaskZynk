@@ -68,7 +68,6 @@ class _KanbanPageState extends State<KanbanPage>
   void initState()
   {
     taskMapFromList();
-    //print(taskMap);
 
     super.initState();
   }

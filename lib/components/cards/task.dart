@@ -56,14 +56,15 @@ class TaskCard extends StatefulWidget
 
 class _TaskCardState extends State<TaskCard>
 {
-  //final text_theme = Theme.of(context).textTheme;
-  //final style_titlesmall = text_theme.titleSmall;
-
   // Controllers
   late TextEditingController titleController;
   late TextEditingController subtitleController;
 
   late String stateProgress;
+  late int statePriority;
+  late int stateSize;
+
+  bool isChipMenuOpen = false;
 
   final InputDecoration textfieldDecoration = InputDecoration(
     isDense: true,
@@ -71,7 +72,7 @@ class _TaskCardState extends State<TaskCard>
   );
 
   // Chip generator
-  List<Widget> getChips()
+  List<Widget> getChips(TextStyle? labelStyle)
   {
     List<Widget> chipList = [];
 
@@ -80,9 +81,20 @@ class _TaskCardState extends State<TaskCard>
     {
       chipList.add(
         MenuAnchor(
+          onOpen: (){
+            setState(() {
+              isChipMenuOpen = true;
+            });
+          },
+          onClose: (){
+            setState(() {
+              isChipMenuOpen = false;
+            });
+          },
           builder:(context, controller, child) {
             return ActionChip(
-              label: Text(stateProgress),
+              label: Text(stateProgress, style: labelStyle),
+              tooltip: "Progress",
               shape: RoundedSuperellipseBorder(
                 borderRadius: BorderRadius.all(Radius.circular(16)),
               ),
@@ -117,21 +129,52 @@ class _TaskCardState extends State<TaskCard>
     // Priority chip
     if(widget.showPriority==true || widget.showPriority==null)
     {
-      final priorityMapResult = priorityMap[widget.data.priority];
+      final priorityMapResult = priorityMap[statePriority];
       if(priorityMapResult!=null)
       {
         chipList.add(
-          Tooltip(
-            message: "Priority",
-            child: Chip(
-              label: Text(priorityMapResult[0]),
-              shape: RoundedSuperellipseBorder(
-                borderRadius: BorderRadius.all(Radius.circular(16)),
-              ),
-              labelStyle: TextStyle(
-                fontSize: 12
-              ),
-            ),
+          MenuAnchor(
+            onOpen: (){
+              setState(() {
+                isChipMenuOpen = true;
+              });
+            },
+            onClose: (){
+              setState(() {
+                isChipMenuOpen = false;
+              });
+            },
+            builder:(context, controller, child) {
+              return ActionChip(
+                label: Text(priorityMapResult[0], style: labelStyle),
+                tooltip: "Priority",
+                shape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                ),
+                labelStyle: TextStyle(
+                  fontSize: 12
+                ),
+                onPressed: (){
+                  if(controller.isOpen){
+                    controller.close();
+                  }
+                  else{
+                    controller.open();
+                  }
+                },
+              );
+            },
+            menuChildren: priorityMap.entries.map((entry){
+              return MenuItemButton(
+                onPressed: (){
+                  setState(()
+                  {
+                    statePriority = entry.key;
+                  });
+                },
+                child: Text(entry.value[0])
+              );
+            }).toList(),
           )
         );
       }
@@ -140,21 +183,52 @@ class _TaskCardState extends State<TaskCard>
     // Size chip
     if(widget.showSize==true || widget.showSize==null)
     {
-      final sizeMapResult = sizeMap[widget.data.size];
+      final sizeMapResult = sizeMap[stateSize];
       if(sizeMapResult!=null)
       {
         chipList.add(
-          Tooltip(
-            message: "Size",
-            child: Chip(
-              label: Text(sizeMapResult[0]),
-              shape: RoundedSuperellipseBorder(
-                borderRadius: BorderRadius.all(Radius.circular(16)),
-              ),
-              labelStyle: TextStyle(
-                fontSize: 12
-              ),
-            ),
+          MenuAnchor(
+            onOpen: (){
+              setState(() {
+                isChipMenuOpen = true;
+              });
+            },
+            onClose: (){
+              setState(() {
+                isChipMenuOpen = false;
+              });
+            },
+            builder:(context, controller, child) {
+              return ActionChip(
+                label: Text(sizeMapResult[0], style: labelStyle),
+                tooltip: "Priority",
+                shape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                ),
+                labelStyle: TextStyle(
+                  fontSize: 12
+                ),
+                onPressed: (){
+                  if(controller.isOpen){
+                    controller.close();
+                  }
+                  else{
+                    controller.open();
+                  }
+                },
+              );
+            },
+            menuChildren: sizeMap.entries.map((entry){
+              return MenuItemButton(
+                onPressed: (){
+                  setState(()
+                  {
+                    stateSize = entry.key;
+                  });
+                },
+                child: Text(entry.value[0])
+              );
+            }).toList(),
           )
         );
       }
@@ -167,18 +241,32 @@ class _TaskCardState extends State<TaskCard>
   void initState()
   {
     stateProgress = widget.data.status;
+    statePriority = widget.data.priority;
+    stateSize = widget.data.size;
+
     subtitleController = TextEditingController(text: widget.data.description);
     titleController = TextEditingController(text: widget.data.title);
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context)
   {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final styleTitleSmall = textTheme.titleSmall;
+    final styleLabelSmall = textTheme.labelSmall;
+    final styleLabelBody = textTheme.bodyMedium;
 
     return Card(
       clipBehavior: Clip.hardEdge,
       child: InkWell(
+        hoverColor: isChipMenuOpen ? Colors.transparent : null,
+        splashColor: isChipMenuOpen ? Colors.transparent : null,
+        highlightColor: isChipMenuOpen ? Colors.transparent : null,
+        focusColor: isChipMenuOpen ? Colors.transparent : null,
         child: Padding(
           padding: EdgeInsetsGeometry.all(0),
           child: Column(
@@ -188,7 +276,7 @@ class _TaskCardState extends State<TaskCard>
               ExpansionTile(
                 title: TextField(
                   controller: titleController,
-                  //style: style_titlesmall,
+                  style: styleTitleSmall,
                   decoration: textfieldDecoration,
                   readOnly: !widget.editable,
                 ),
@@ -200,11 +288,19 @@ class _TaskCardState extends State<TaskCard>
                 dense: true,
 
                 children: [
-                  TextField(
-                    controller: subtitleController,
-                    //style: style_titlesmall,
-                    decoration: textfieldDecoration,
-                    readOnly: !widget.editable,
+                  Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: colorScheme.outline.withValues(alpha: 0.1), width: 2),
+                      borderRadius: BorderRadius.circular(8)
+                    ),
+                    child: TextField(
+                      controller: subtitleController,
+                      style: styleLabelBody,
+                      decoration: textfieldDecoration,
+                      readOnly: !widget.editable,
+                      maxLines: null,
+                    )
                   )
                 ],
               ),
@@ -220,7 +316,7 @@ class _TaskCardState extends State<TaskCard>
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        ...getChips(),
+                        ...getChips(styleLabelSmall),
                       ],
                     ),
                   ),
