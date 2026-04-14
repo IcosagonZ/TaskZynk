@@ -22,11 +22,22 @@ class TaskCard extends StatelessWidget
   final TaskData data;
   final bool editable;
 
-  const TaskCard(
+  bool? showStatus;
+  bool? showPriority;
+  bool? showSize;
+  bool? showEdit;
+  bool? showCheck;
+
+  TaskCard(
     {
       Key? key,
       required this.data,
       required this.editable,
+      this.showStatus,
+      this.showPriority,
+      this.showSize,
+      this.showEdit,
+      this.showCheck,
     }
   ):super(key:key);
 
@@ -51,30 +62,13 @@ class TaskCard extends StatelessWidget
       List<Widget> chipList = [];
 
       // Progress chip
-      chipList.add(
-        Tooltip(
-          message: "Status",
-          child: Chip(
-            label: Text(data.status),
-            shape: RoundedSuperellipseBorder(
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            ),
-            labelStyle: TextStyle(
-              fontSize: 12
-            ),
-          ),
-        )
-      );
-
-      // Priority chip
-      final priorityMapResult = priorityMap[data.priority];
-      if(priorityMapResult!=null)
+      if(showStatus==true || showStatus==null)
       {
         chipList.add(
           Tooltip(
-            message: "Priority",
+            message: "Status",
             child: Chip(
-              label: Text(priorityMapResult[0]),
+              label: Text(data.status),
               shape: RoundedSuperellipseBorder(
                 borderRadius: BorderRadius.all(Radius.circular(16)),
               ),
@@ -86,102 +80,143 @@ class TaskCard extends StatelessWidget
         );
       }
 
-      // Size chip
-      final sizeMapResult = sizeMap[data.size];
-      if(sizeMapResult!=null)
+      // Priority chip
+      if(showPriority==true || showPriority==null)
       {
-        chipList.add(
-          Tooltip(
-            message: "Size",
-            child: Chip(
-              label: Text(sizeMapResult[0]),
-              shape: RoundedSuperellipseBorder(
-                borderRadius: BorderRadius.all(Radius.circular(16)),
+        final priorityMapResult = priorityMap[data.priority];
+        if(priorityMapResult!=null)
+        {
+          chipList.add(
+            Tooltip(
+              message: "Priority",
+              child: Chip(
+                label: Text(priorityMapResult[0]),
+                shape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                ),
+                labelStyle: TextStyle(
+                  fontSize: 12
+                ),
               ),
-              labelStyle: TextStyle(
-                fontSize: 12
+            )
+          );
+        }
+      }
+
+      // Size chip
+      if(showSize==true || showSize==null)
+      {
+        final sizeMapResult = sizeMap[data.size];
+        if(sizeMapResult!=null)
+        {
+          chipList.add(
+            Tooltip(
+              message: "Size",
+              child: Chip(
+                label: Text(sizeMapResult[0]),
+                shape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                ),
+                labelStyle: TextStyle(
+                  fontSize: 12
+                ),
               ),
-            ),
-          )
-        );
+            )
+          );
+        }
       }
 
       return chipList;
     }
 
     return Card(
-      child: Padding(
-        padding: EdgeInsetsGeometry.all(0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        child: Padding(
+          padding: EdgeInsetsGeometry.all(0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
 
-          children: [
-            ExpansionTile(
-              title: TextField(
-                controller: titleController,
-                style: style_titlesmall,
-                decoration: textfieldDecoration,
-                readOnly: !editable,
-              ),
-
-              expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
-              childrenPadding: EdgeInsets.all(16),
-
-              shape: Border(),
-              dense: true,
-
-              children: [
-                TextField(
-                  controller: subtitleController,
+            children: [
+              ExpansionTile(
+                title: TextField(
+                  controller: titleController,
                   style: style_titlesmall,
                   decoration: textfieldDecoration,
                   readOnly: !editable,
-                )
-              ],
-            ),
+                ),
 
-            SizedBox(height: 8),
+                expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+                childrenPadding: EdgeInsets.all(16),
 
-            Row(
-              children: [
-                SizedBox(width: 16),
-                // Chips
-                Expanded(
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      ...getChips(),
-                    ],
+                shape: Border(),
+                dense: true,
+
+                children: [
+                  TextField(
+                    controller: subtitleController,
+                    style: style_titlesmall,
+                    decoration: textfieldDecoration,
+                    readOnly: !editable,
+                  )
+                ],
+              ),
+
+              SizedBox(height: 8),
+
+              Row(
+                children: [
+                  SizedBox(width: 16),
+                  // Chips
+                  Expanded(
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        ...getChips(),
+                      ],
+                    ),
                   ),
-                ),
-                // Action icons
-                IconButton.outlined(
-                  icon: Icon(Icons.edit),
-                  tooltip: "Edit",
-                  iconSize: 16,
-                  onPressed: (){
-                    print("Edit pressed");
-                  },
-                  visualDensity: VisualDensity.compact,
-                ),
-                SizedBox(width: 8),
-                IconButton.outlined(
-                  icon: Icon(Icons.check),
-                  tooltip: "Task done",
-                  iconSize: 16,
-                  onPressed: (){
-                    print("Check pressed");
-                  },
-                  visualDensity: VisualDensity.compact,
-                ),
-                SizedBox(width: 16)
-              ],
-            ),
+                  // Action icons
+                  Visibility(
+                    visible: showEdit==true || showEdit==null,
+                    child: IconButton.outlined(
+                      icon: Icon(Icons.edit),
+                      tooltip: "Edit",
+                      iconSize: 16,
+                      onPressed: (){
+                        print("Edit pressed");
+                      },
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                  Visibility(
+                    visible: (showCheck==true || showCheck==null) && (showEdit==true || showEdit==null),
+                    child: SizedBox(width: 8),
+                  ),
+                  Visibility(
+                    visible: showCheck==true || showCheck==null,
+                    child: IconButton.outlined(
+                      icon: Icon(Icons.check),
+                      tooltip: "Task done",
+                      iconSize: 16,
+                      onPressed: (){
+                        print("Check pressed");
+                      },
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                  SizedBox(width: 16)
+                ],
+              ),
 
-            SizedBox(height: 16),
-          ],
-        )
+              SizedBox(height: 16),
+            ],
+          )
+        ),
+        onTap: (){
+          print("Card pressed");
+        }
       )
     );
   }

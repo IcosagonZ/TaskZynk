@@ -21,16 +21,16 @@ class _EmptyPageState extends State<EmptyPage>
       (
         title: Text("Empty"),
       ),
-     body: Center
-     (
-       child: Column
-       (
-         mainAxisAlignment: .center,
-        children: [
-          Text("Welcome to TaskZynk"),
-        ],
-       ),
-     ),
+      body: Center
+      (
+        child: Column
+        (
+          mainAxisAlignment: .center,
+          children: [
+            Text("Welcome to TaskZynk"),
+          ],
+        ),
+      ),
     );
   }
 }
