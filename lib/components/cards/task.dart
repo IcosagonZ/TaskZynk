@@ -65,6 +65,7 @@ class _TaskCardState extends State<TaskCard>
   late int stateSize;
 
   bool isChipMenuOpen = false;
+  bool isTaskDone = false;
 
   final InputDecoration textfieldDecoration = InputDecoration(
     isDense: true,
@@ -113,11 +114,14 @@ class _TaskCardState extends State<TaskCard>
           },
           menuChildren: progressMap.keys.map((String key){
             return MenuItemButton(
-              onPressed: (){
+              onPressed: ()
+              {
                 setState(()
                 {
                   stateProgress = key;
                 });
+
+                updateWidget();
               },
               child: Text(key)
             );
@@ -188,12 +192,14 @@ class _TaskCardState extends State<TaskCard>
       {
         chipList.add(
           MenuAnchor(
-            onOpen: (){
+            onOpen: ()
+            {
               setState(() {
                 isChipMenuOpen = true;
               });
             },
-            onClose: (){
+            onClose: ()
+            {
               setState(() {
                 isChipMenuOpen = false;
               });
@@ -220,7 +226,8 @@ class _TaskCardState extends State<TaskCard>
             },
             menuChildren: sizeMap.entries.map((entry){
               return MenuItemButton(
-                onPressed: (){
+                onPressed: ()
+                {
                   setState(()
                   {
                     stateSize = entry.key;
@@ -237,6 +244,22 @@ class _TaskCardState extends State<TaskCard>
     return chipList;
   }
 
+  // Run when change in data occurs
+  void updateWidget()
+  {
+    setState(()
+    {
+      if(stateProgress=="Done")
+      {
+        isTaskDone = true;
+      }
+      else
+      {
+        isTaskDone = false;
+      }
+    });
+  }
+
   @override
   void initState()
   {
@@ -246,6 +269,8 @@ class _TaskCardState extends State<TaskCard>
 
     subtitleController = TextEditingController(text: widget.data.description);
     titleController = TextEditingController(text: widget.data.title);
+
+    updateWidget();
 
     super.initState();
   }
@@ -260,13 +285,29 @@ class _TaskCardState extends State<TaskCard>
     final styleLabelSmall = textTheme.labelSmall;
     final styleLabelBody = textTheme.bodyMedium;
 
+    TextStyle? styleTaskTitle = styleLabelSmall;
+
+    if(isTaskDone)
+    {
+      if(styleTitleSmall!=null)
+      {
+        styleTaskTitle = styleTitleSmall.copyWith(decoration: TextDecoration.lineThrough);
+      }
+    }
+    else
+    {
+      styleTaskTitle = styleTitleSmall;
+    }
+
     return Card(
       clipBehavior: Clip.hardEdge,
       child: InkWell(
+        // Fix for focus bug when opening chip dropdown
         hoverColor: isChipMenuOpen ? Colors.transparent : null,
         splashColor: isChipMenuOpen ? Colors.transparent : null,
         highlightColor: isChipMenuOpen ? Colors.transparent : null,
         focusColor: isChipMenuOpen ? Colors.transparent : null,
+
         child: Padding(
           padding: EdgeInsetsGeometry.all(0),
           child: Column(
@@ -276,7 +317,7 @@ class _TaskCardState extends State<TaskCard>
               ExpansionTile(
                 title: TextField(
                   controller: titleController,
-                  style: styleTitleSmall,
+                  style: styleTaskTitle,
                   decoration: textfieldDecoration,
                   readOnly: !widget.editable,
                 ),
@@ -344,7 +385,10 @@ class _TaskCardState extends State<TaskCard>
                       tooltip: "Task done",
                       iconSize: 16,
                       onPressed: (){
-                        print("Check pressed");
+                        setState(() {
+                          isTaskDone = true;
+                          stateProgress = "Done";
+                        });
                       },
                       visualDensity: VisualDensity.compact,
                     ),
